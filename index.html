@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Power Note SVG – Rock</title>
+  <style>
+    :root{
+      --bg1:#000;
+      --bg2:#222;
+      --c1:#6a4c93; /* purple */
+      --c2:#3a0ca3; /* blue */
+      --c3:#1982c4; /* cyan */
+      --c4:#8ac926; /* lime */
+    }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 50% 40%, var(--bg2) 0%, var(--bg1) 60%);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      overflow: hidden;
+    }
+    h1 {
+      margin: 0;
+      font-weight: 900;
+      letter-spacing: .5px;
+      text-align: center;
+      text-shadow: 0 0 12px rgba(106,76,147,.6);
+      font-size: clamp(18px, 3.5vw, 28px);
+    }
+    .stage {
+      width: min(90vw, 360px);
+      aspect-ratio: 3/4;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+    svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+    .outline {
+      filter: drop-shadow(0 4px 20px rgba(106,76,147,.2));
+    }
+    #msg {
+      display: none;
+      font-weight: 800;
+      color: var(--c4);
+      text-align: center;
+    }
+    #startPerm {
+      appearance:none;
+      border: 1px solid #444;
+      background: #0f0f0f;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 0 0 0 rgba(106,76,147,.0);
+      transition: box-shadow .2s ease, transform .2s ease;
+    }
+    #startPerm:hover { box-shadow: 0 0 0 6px rgba(106,76,147,.15); transform: translateY(-1px); }
+    /* Confetti */
+    .confetti {
+      position: fixed;
+      top: -10px;
+      font-size: 22px;
+      animation: fall 2.2s linear forwards;
+      z-index: 999;
+      pointer-events: none;
+    }
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(360deg); opacity:.0; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Agita y libera tu energía 🎵</h1>
+  <button id="startPerm" aria-label="Activar sensores">Activar sensor de movimiento</button>
+  <div class="stage">
+    <svg viewBox="0 0 200 260" role="img" aria-label="Contenedor de energía con forma de nota musical">
+      <defs>
+        <!-- Gradiente vertical sin rojo -->
+        <linearGradient id="gradFill" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stop-color="var(--c1)" />
+          <stop offset="40%" stop-color="var(--c2)" />
+          <stop offset="75%" stop-color="var(--c3)" />
+          <stop offset="100%" stop-color="var(--c4)" />
+        </linearGradient>
+
+        <!-- Clip de la nota (cabeza + plica + corchete) -->
+        <clipPath id="noteClip" clipPathUnits="userSpaceOnUse">
+          <!-- Cabeza (elipse) -->
+          <ellipse cx="78" cy="200" rx="42" ry="30" />
+          <!-- Plica (rectángulo) -->
+          <rect x="110" y="68" width="16" height="112" rx="6" />
+          <!-- Corchete (bandera) -->
+          <path d="M126,68 C160,60 176,78 176,92 C176,104 164,112 150,116
+                   C168,122 176,132 176,144 C176,160 156,170 136,172
+                   C132,162 128,150 126,138 Z" />
+        </clipPath>
+
+        <!-- Patrón de ondas para simular líquido -->
+        <pattern id="wavePattern" patternUnits="userSpaceOnUse" width="200" height="40">
+          <path id="wavePath" d="" fill="url(#gradFill)"></path>
+        </pattern>
+
+        <!-- Contorno de la nota para dibujar por encima -->
+        <g id="noteOutline">
+          <ellipse cx="78" cy="200" rx="42" ry="30" fill="none" stroke="#fff" stroke-width="6" />
+          <rect x="110" y="68" width="16" height="112" rx="6" fill="none" stroke="#fff" stroke-width="6" />
+          <path d="M126,68 C160,60 176,78 176,92 C176,104 164,112 150,116
+                   C168,122 176,132 176,144 C176,160 156,170 136,172
+                   C132,162 128,150 126,138 Z"
+                fill="none" stroke="#fff" stroke-width="6" />
+        </g>
+      </defs>
+
+      <!-- Grupo recortado con la silueta de la nota -->
+      <g clip-path="url(#noteClip)">
+        <!-- Rect de base que iremos expandiendo en Y -->
+        <rect id="fillRect" x="0" y="260" width="200" height="0" fill="url(#gradFill)"></rect>
+        <!-- Onda superior animada (se recoloca con JS justo en la línea de llenado) -->
+        <rect id="waveLayer" x="0" y="220" width="200" height="40" fill="url(#wavePattern)" opacity="0.85"></rect>
+      </g>
+
+      <!-- Dibujo del contorno por encima -->
+      <use href="#noteOutline" class="outline" />
+
+      <!-- HUD de progreso -->
+      <text id="progressText" x="100" y="248" fill="var(--c4)" text-anchor="middle" font-weight="800" font-size="14">
+        0% cargado
+      </text>
+    </svg>
+  </div>
+  <div id="msg">¡Felicitaciones! ⚡ Has cargado la nota al 100% 🎸</div>
+
+  <script>
+    let progress = 0; // 0..100
+    const fillRect = document.getElementById('fillRect');
+    const waveLayer = document.getElementById('waveLayer');
+    const progressText = document.getElementById('progressText');
+    const msg = document.getElementById('msg');
+    const startBtn = document.getElementById('startPerm');
+    const wavePath = document.getElementById('wavePath');
+
+    const SVG_H = 260;
+    const WAVE_H = 40;
+    let t = 0; // fase de onda
+
+    function updateFill(){
+      const h = (progress/100) * SVG_H;
+      const y = SVG_H - h;
+      fillRect.setAttribute('y', y.toFixed(2));
+      fillRect.setAttribute('height', h.toFixed(2));
+      waveLayer.setAttribute('y', Math.max(y - (WAVE_H*0.6), 0).toFixed(2));
+      progressText.textContent = `${progress}% cargado`;
+
+      if(progress >= 100){
+        msg.style.display = 'block';
+        launchConfetti();
+      }
+    }
+
+    // Dibuja una onda sinusoidal cerrada para usar como patrón
+    function drawWave(){
+      const w = 200;
+      const amp = 6;                 // amplitud
+      const lambda = 40;             // longitud de onda
+      const yBase = 30 + Math.sin(t/8)*2; // leve vaivén vertical
+      let d = `M 0 ${yBase.toFixed(2)}`;
+      for(let x=0; x<=w; x+=2){
+        const y = yBase + Math.sin((x + t) * (Math.PI*2 / lambda)) * amp;
+        d += ` L ${x} ${y.toFixed(2)}`;
+      }
+      // cerrar el polígono para rellenar bajo la onda
+      d += ` L ${w} 40 L 0 40 Z`;
+      wavePath.setAttribute('d', d);
+      t += 1.6; // velocidad
+      requestAnimationFrame(drawWave);
+    }
+
+    // Confetti con emojis
+    function launchConfetti(){
+      const emojis = ['🎸','✨','🌟','🎶'];
+      for(let i=0;i<42;i++){
+        const el = document.createElement('div');
+        el.className = 'confetti';
+        el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+        el.style.left = Math.random()*100 + 'vw';
+        el.style.transform = `translateY(-10px) rotate(${Math.random()*180}deg)`;
+        el.style.animationDelay = (Math.random()*0.3)+'s';
+        document.body.appendChild(el);
+        setTimeout(()=> el.remove(), 2400);
+      }
+    }
+
+    // Manejo de sensor con fallback de permiso en iOS
+    async function enableSensor(){
+      try{
+        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
+          const res = await DeviceMotionEvent.requestPermission();
+          if (res !== 'granted') { alert('Permiso denegado para el acelerómetro.'); return; }
+        }
+        window.addEventListener('devicemotion', onMotion);
+        startBtn.style.display = 'none';
+      }catch(e){
+        console.warn('No se pudo habilitar el sensor:', e);
+      }
+    }
+
+    function onMotion(e){
+      const a = e.accelerationIncludingGravity || e.acceleration || {x:0,y:0,z:0};
+      const mag = Math.abs(a.x||0) + Math.abs(a.y||0) + Math.abs(a.z||0);
+      // Umbral y anti rebote simple
+      if (mag > 25 && progress < 100){
+        progress = Math.min(100, progress + 1);
+        updateFill();
+      }
+    }
+
+    startBtn.addEventListener('click', enableSensor);
+    // Auto-intento en navegadores que no requieren permiso explícito
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission !== 'function'){
+      window.addEventListener('devicemotion', onMotion, { once:true });
+      // si llega algún evento, escondemos el botón
+      setTimeout(()=> startBtn.style.display='none', 1500);
+    }
+
+    // Init
+    updateFill();
+    drawWave();
+  </script>
+</body>
+</html>
