@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Llena tu nota musical</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #ffd6ec, #d6f6ff, #ffe2b3);
+      background-size: 400% 400%;
+      animation: gradientBG 10s ease infinite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      position: relative;
+      width: 200px;
+      height: 270px;
+    }
+
+    .nota {
+      position: absolute;
+      width: 100%;
+      height: auto;
+      z-index: 2;
+    }
+
+    .relleno {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 0%;
+      background: linear-gradient(to top, red, orange, yellow, green, blue, indigo, violet);
+      z-index: 1;
+      mask-image: url('nota.png');
+      -webkit-mask-image: url('nota.png');
+      mask-size: contain;
+      -webkit-mask-size: contain;
+      mask-repeat: no-repeat;
+      -webkit-mask-repeat: no-repeat;
+      mask-position: center;
+      -webkit-mask-position: center;
+    }
+
+    #mensaje {
+      margin-top: 20px;
+      font-size: 1.2em;
+      font-weight: bold;
+      display: none;
+    }
+
+    .confetti {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2em;
+      animation: fall 2s linear forwards;
+      z-index: 999;
+    }
+
+    @keyframes fall {
+      0% { top: 0; opacity: 1; }
+      100% { top: 100vh; opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="relleno" id="relleno"></div>
+    <img src="nota.png" class="nota" alt="nota musical" />
+  </div>
+  <div id="mensaje">¡Felicitaciones! 🎉 Has llenado la nota musical. 🎵</div>
+
+  <script>
+    let progreso = 0;
+    const relleno = document.getElementById('relleno');
+    const mensaje = document.getElementById('mensaje');
+
+    function lanzarConfetti() {
+      for (let i = 0; i < 20; i++) {
+        const conf = document.createElement('div');
+        conf.classList.add('confetti');
+        conf.style.left = Math.random() * 100 + 'vw';
+        conf.textContent = ['🎉', '✨', '🌟', '🎶'][Math.floor(Math.random() * 4)];
+        document.body.appendChild(conf);
+        setTimeout(() => conf.remove(), 2000);
+      }
+    }
+
+    if (window.DeviceMotionEvent) {
+      window.addEventListener('devicemotion', (e) => {
+        const shake = Math.abs(e.acceleration.x) + Math.abs(e.acceleration.y) + Math.abs(e.acceleration.z);
+        if (shake > 25 && progreso < 100) {
+          progreso++;
+          relleno.style.height = progreso + '%';
+          if (progreso === 100) {
+            mensaje.style.display = 'block';
+            lanzarConfetti();
+          }
+        }
+      });
+    } else {
+      alert('Tu dispositivo no soporta detección de movimiento.');
+    }
+  </script>
+</body>
+</html>
