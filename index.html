@@ -1,423 +1,281 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-  <title>Corchea que se rellena · Kids ↔ SAP</title>
-  <meta name="theme-color" content="#0057D2" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Rock Challenge</title>
   <style>
-    :root{
-      --text:#ffffff;
-      --muted: rgba(255,255,255,.78);
-      --radius:22px;
-      --shadow: 0 12px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.035);
-    }
-    /* Theme containers: set backgrounds per body class */
-    body{
-      margin:0; height:100%; color:var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-      overflow:hidden;
-    }
-    body.theme-sap{
-      background:
-        radial-gradient(1000px 600px at 20% -10%, rgba(0,112,242,0.18), transparent 40%),
-        radial-gradient(900px 600px at 90% 110%, rgba(137,209,255,0.14), transparent 40%),
-        linear-gradient(180deg,#00144A 0%, #0040B0 35%, #0057D2 65%, #0070F2 100%);
-    }
-    body.theme-kids{
-      background:
-        radial-gradient(1200px 600px at 20% -10%, rgba(106,59,255,0.18), transparent 40%),
-        radial-gradient(1100px 600px at 80% 110%, rgba(0,160,220,0.12), transparent 40%),
-        linear-gradient(180deg,#0c1222 0%, #1a1f3c 60%, #0c1222 100%);
+    :root {
+      --sap-blue: #00A1E0;
+      --neon-pink: #FF00FF;
+      --electric-blue: #03DAC6; 
+      --dark-background: #1A1A2E;
+      --glow-color: #E0F7FA;
     }
 
-    .wrap{ height:100%; display:grid; grid-template-rows:auto 1fr auto; gap:12px; }
-    header{ padding:16px 20px 8px; display:flex; align-items:center; justify-content:space-between; }
-    .logo{ display:flex; align-items:center; gap:12px; font-weight:700; letter-spacing:.3px; }
-    .logo-badge{ width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,#0070F2, #89D1FF); box-shadow: 0 6px 24px rgba(0,0,0,.35); }
-    .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
-    .btn{
-      -webkit-tap-highlight-color: transparent; user-select:none; cursor:pointer;
-      padding: 12px 16px; border-radius: 14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
-      color:var(--text); font-weight:700; letter-spacing:.3px;
-      box-shadow: var(--shadow);
-      transition: transform .06s ease, box-shadow .2s ease, background .2s ease;
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--dark-background);
+      background-image: radial-gradient(circle at 50% 50%, #4a2f8c 0%, #1a1a2e 70%);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center; /* Centra el contenido verticalmente */
+      height: 100vh;
+      box-sizing: border-box;
     }
-    .btn:hover{ transform: translateY(-1px);}
-    .btn:active{ transform: translateY(1px) scale(.995);}
-    .btn.secondary{ background: rgba(255,255,255,.06); }
-    .segmented{
-      display:flex; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,.14);
-      box-shadow: var(--shadow);
-    }
-    .segmented button{
-      border:none; background: rgba(255,255,255,.05); padding:10px 14px; color:#fff; font-weight:700; cursor:pointer;
-    }
-    .segmented button.active{ background: rgba(255,255,255,.18); }
 
-    .card{
-      width:min(980px, 92vw); margin: 0 auto;
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.00));
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow: var(--shadow);
-      border-radius: var(--radius); display:grid; grid-template-columns: 1fr; align-items:center;
-      padding: 18px; gap:18px;
+    /* --- Overlays --- */
+    .overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(26, 26, 46, 0.95); backdrop-filter: blur(10px);
+      z-index: 10000; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; padding: 25px;
+      box-sizing: border-box; transition: opacity 0.5s ease-out;
+      opacity: 1; pointer-events: auto;
     }
-    .hero{ display:grid; gap:16px; grid-template-columns: 1fr; }
-    @media(min-width:860px){ .hero{ grid-template-columns: 420px 1fr; align-items:center;} }
-    .panel{ background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); border-radius: var(--radius); padding:18px; box-shadow: var(--shadow);}
+    .overlay.hidden { opacity: 0; pointer-events: none; }
+    .overlay-content { max-width: 450px; }
+    .overlay-content h2 { font-size: 28px; color: var(--sap-blue); text-shadow: none; }
+    .overlay-content p { font-size: 18px; line-height: 1.6; }
+    #startButton {
+      margin-top: 25px; padding: 15px 30px; font-size: 20px; font-weight: bold;
+      color: white; background-color: var(--sap-blue);
+      border: none; border-radius: 10px; cursor: pointer;
+      box-shadow: 0 0 15px var(--sap-blue);
+      transition: transform 0.2s;
+    }
+    #startButton:active { transform: scale(0.95); }
 
-    .meter{ display:grid; place-items:center; margin:0 auto; position:relative; }
-    .note-wrap{ width:min(420px, 86vw); aspect-ratio: 1/1; position:relative; display:grid; place-items:center; filter: drop-shadow(0 10px 24px rgba(0,0,0,.35)); }
-    .note-wrap .label{ position:absolute; inset:auto 0 6%; text-align:center; font-weight:800; letter-spacing:.5px; font-size: clamp(22px, 6vw, 34px); text-shadow: 0 1px 0 rgba(0,0,0,.45);}
-    .label small{ display:block; font-weight:600; font-size:.46em; color:var(--muted); margin-top:6px;}
-    .hint{ color:var(--muted); font-size:.95rem; line-height:1.4; }
-    .footer{ padding:10px 20px 18px; color:var(--muted); font-size:.9rem; text-align:center; }
+    /* OVERLAY FINAL "WOW" ACTUALIZADO */
+    #overlay-results .results-wrapper {
+        transform: scale(0.8);
+        opacity: 0;
+        animation: result-appear 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+    @keyframes result-appear {
+      to { transform: scale(1); opacity: 1; }
+    }
+    #overlay-results .final-message {
+        font-size: 2.8em;
+        font-weight: 700; /* Más grueso */
+        margin-bottom: 10px;
+        color: var(--electric-blue);
+        text-shadow: 0 0 8px var(--electric-blue), 0 0 15px white;
+        /* CONTORNO GRUESO */
+        -webkit-text-stroke: 2px white;
+        text-stroke: 2px white;
+        paint-order: stroke fill;
+    }
+    #overlay-results .final-time-value {
+        font-size: 6em;
+        font-weight: 900;
+        color: var(--neon-pink);
+        /* CONTORNO GRUESO */
+        -webkit-text-stroke: 2px white;
+        text-stroke: 2px white;
+        paint-order: stroke fill;
+        text-shadow: 0 0 10px var(--neon-pink), 0 0 20px white, 0 0 30px var(--neon-pink);
+        margin: 0;
+    }
 
-    #confettiCanvas{ position:fixed; inset:0; pointer-events:none; }
-    .win{ position: fixed; inset:0; display:grid; place-items:center; pointer-events:none; opacity:0; transition: opacity .35s ease; }
-    .win.show{ opacity:1; }
-    .win .msg{ background: rgba(0,0,0,.65); border: 1px solid rgba(255,255,255,.12); padding: 22px 24px; border-radius: 18px; box-shadow: var(--shadow); text-align:center; max-width:min(640px, 92vw);}
-    .msg h2{ margin: 0 0 6px; font-size: clamp(22px, 5vw, 32px); }
-    .msg p{ margin: 0; color: var(--muted);}
-    .debug{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.86rem; color:#a9b9de; background: rgba(0,0,0,.2); border-radius: 10px; padding:10px; margin-top:10px; word-break: break-word; }
+    /* --- Contenido Principal --- */
+    .game-area { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; }
+    .music-note-container {
+      /* CORCHEA AUMENTADA 40% (234px * 1.4 = ~328px) */
+      width: 328px;
+      margin-bottom: 20px; /* Espacio para que no choque con el footer */
+      filter: drop-shadow(0 0 8px var(--glow-color));
+      animation: breathing 4s ease-in-out infinite alternate;
+    }
+    @keyframes breathing {
+      from { transform: scale(1); }
+      to { transform: scale(1.03); }
+    }
+    .footer { width: 100%; font-size: 12px; opacity: 0.4; padding: 10px 0; }
+    #confetti-canvas {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 10001;
+    }
   </style>
 </head>
-<body class="theme-sap">
-  <canvas id="confettiCanvas"></canvas>
-  <div class="wrap">
-    <header>
-      <div class="logo">
-        <div class="logo-badge" aria-hidden="true"></div>
-        <div>Corchea que se rellena</div>
-      </div>
-      <div class="controls">
-        <div class="segmented" role="tablist" aria-label="Tema">
-          <button id="btn-sap" class="active" role="tab" aria-selected="true">SAP</button>
-          <button id="btn-kids" role="tab" aria-selected="false">Kids</button>
-        </div>
-        <button id="btn-permission" class="btn">🔓 Sensores</button>
-        <button id="btn-tap" class="btn secondary">👆 Sumar</button>
-        <button id="btn-restart" class="btn secondary" hidden>↻ Reiniciar</button>
-      </div>
-    </header>
+<body>
 
-    <main class="card">
-      <section class="panel">
-        <div class="hero">
-          <div class="meter">
-            <div class="note-wrap">
-              <!-- SVG NOTE PROGRESS -->
-              <svg id="noteSVG" viewBox="0 0 300 300" aria-label="Corchea">
-                <defs>
-                  <!-- Gradientes de relleno para cada tema -->
-                  <linearGradient id="gradKids" x1="0%" y1="100%" x2="0%" y2="0%">
-                    <stop offset="0%" stop-color="#6a00ff"/>
-                    <stop offset="16%" stop-color="#00a0ff"/>
-                    <stop offset="33%" stop-color="#00ffe5"/>
-                    <stop offset="50%" stop-color="#57ff36"/>
-                    <stop offset="66%" stop-color="#ffee00"/>
-                    <stop offset="83%" stop-color="#ff7a00"/>
-                    <stop offset="100%" stop-color="#ff00d4"/>
-                  </linearGradient>
-                  <linearGradient id="gradSAP" x1="0%" y1="100%" x2="0%" y2="0%">
-                    <stop offset="0%" stop-color="#0040B0"/>
-                    <stop offset="65%" stop-color="#0057D2"/>
-                    <stop offset="100%" stop-color="#89D1FF"/>
-                  </linearGradient>
-
-                  <!-- Máscara a partir de la corchea (blanco = visible) -->
-                  <mask id="noteMask">
-                    <g transform="translate(50.0000,0.0000) scale(0.444444)" fill="#ffffff" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" stroke-linecap="round">
-                      <defs><clipPath id="1c323f6acc"><path d="M 9.667969 82.167969 L 440 82.167969 L 440 592.164062 L 9.667969 592.164062 Z M 9.667969 82.167969 "/></clipPath><clipPath id="d23d4fdc49"><path d="M 13.011719 82.167969 L 443.621094 82.167969 L 443.621094 592.164062 L 13.011719 592.164062 Z M 13.011719 82.167969 "/></clipPath></defs><g id="f31d12c0b1"><g clip-rule="nonzero" clip-path="url(#1c323f6acc)"><path style=" stroke:none;fill-rule:evenodd;fill:#000000;fill-opacity:1;" d="M 254.207031 82.925781 C 255.757812 82.183594 257.5625 82.199219 259.101562 82.964844 C 275.875 91.296875 300.304688 108.71875 319.824219 134.195312 C 339.398438 159.746094 354.203125 193.648438 350.992188 234.667969 C 348.054688 272.214844 361.496094 296.023438 379.054688 310.835938 C 396.886719 325.878906 419.390625 331.972656 434.5625 332.910156 C 437.113281 333.066406 439.234375 334.9375 439.714844 337.449219 C 440.191406 339.964844 438.90625 342.480469 436.589844 343.566406 C 416.050781 353.183594 383.800781 361.875 353.996094 355.953125 C 338.964844 352.96875 324.46875 346.242188 312.566406 333.980469 C 300.671875 321.726562 291.695312 304.285156 287.128906 280.417969 C 286.113281 275.113281 285.050781 271.0625 283.984375 268.101562 C 283.199219 265.917969 282.492188 264.558594 281.960938 263.761719 C 281.722656 264.007812 281.425781 264.335938 281.078125 264.777344 C 278.542969 267.996094 275.476562 274.253906 272.066406 283.492188 C 268.71875 292.5625 265.222656 303.980469 261.65625 317.085938 C 247.371094 369.578125 232.347656 447.574219 221.121094 505.886719 C 220.746094 507.824219 220.378906 509.742188 220.011719 511.636719 C 216.257812 557.539062 169.710938 592.164062 115.019531 592.164062 C 58.054688 592.164062 9.785156 554.511719 9.785156 505.742188 C 9.785156 456.972656 58.054688 419.320312 115.019531 419.320312 C 136.609375 419.320312 156.75 424.652344 173.523438 433.871094 L 251.15625 86.753906 C 251.53125 85.078125 252.65625 83.664062 254.207031 82.925781 Z M 260.464844 96.398438 L 182.753906 443.867188 C 182.355469 445.65625 181.105469 447.136719 179.40625 447.828125 C 177.710938 448.519531 175.785156 448.339844 174.246094 447.339844 C 158.132812 436.863281 137.546875 430.515625 115.019531 430.515625 C 61.921875 430.515625 20.972656 465.238281 20.972656 505.742188 C 20.972656 546.246094 61.921875 580.96875 115.019531 580.96875 C 166.003906 580.96875 205.914062 548.871094 208.886719 510.449219 C 208.902344 510.238281 208.929688 510.027344 208.96875 509.820312 C 209.296875 508.117188 209.628906 506.398438 209.964844 504.65625 L 210.164062 503.617188 C 221.359375 445.472656 236.453125 367.089844 250.863281 314.144531 C 254.472656 300.882812 258.066406 289.113281 261.574219 279.609375 C 265.019531 270.273438 268.578125 262.5625 272.292969 257.847656 C 274.097656 255.554688 276.558594 253.15625 279.789062 252.296875 C 283.65625 251.269531 287.054688 252.792969 289.449219 255.269531 C 291.609375 257.5 293.210938 260.699219 294.511719 264.304688 C 295.847656 268.015625 297.042969 272.683594 298.117188 278.3125 C 302.363281 300.488281 310.511719 315.796875 320.589844 326.179688 C 330.660156 336.550781 342.988281 342.351562 356.171875 344.972656 C 375.21875 348.753906 395.859375 345.84375 413.136719 340.570312 C 399.621094 336.917969 384.722656 330.261719 371.84375 319.394531 C 351.5 302.234375 336.625 274.898438 339.839844 233.792969 C 342.785156 196.15625 329.269531 164.921875 310.945312 141.007812 C 294.941406 120.121094 275.40625 105.003906 260.464844 96.398438 Z M 260.464844 96.398438 "/></g><g clip-rule="nonzero" clip-path="url(#d23d4fdc49)"><path style=" stroke:none;fill-rule:evenodd;fill:#000000;fill-opacity:1;" d="M 257.550781 82.925781 C 259.101562 82.183594 260.90625 82.199219 262.445312 82.964844 C 279.21875 91.296875 303.648438 108.71875 323.167969 134.195312 C 342.742188 159.746094 357.546875 193.648438 354.335938 234.667969 C 351.398438 272.214844 364.839844 296.023438 382.398438 310.835938 C 400.230469 325.878906 422.734375 331.972656 437.90625 332.910156 C 440.457031 333.066406 442.578125 334.9375 443.058594 337.449219 C 443.535156 339.964844 442.25 342.480469 439.933594 343.566406 C 419.394531 353.183594 387.140625 361.875 357.335938 355.953125 C 342.308594 352.96875 327.8125 346.242188 315.90625 333.980469 C 304.011719 321.726562 295.039062 304.285156 290.472656 280.417969 C 289.457031 275.113281 288.394531 271.0625 287.328125 268.101562 C 286.542969 265.917969 285.835938 264.558594 285.304688 263.761719 C 285.0625 264.007812 284.769531 264.335938 284.421875 264.777344 C 281.886719 267.996094 278.820312 274.253906 275.410156 283.492188 C 272.0625 292.5625 268.566406 303.980469 265 317.085938 C 250.714844 369.578125 235.691406 447.574219 224.464844 505.886719 C 224.089844 507.824219 223.722656 509.742188 223.355469 511.636719 C 219.601562 557.539062 173.050781 592.164062 118.363281 592.164062 C 61.398438 592.164062 13.128906 554.511719 13.128906 505.742188 C 13.128906 456.972656 61.398438 419.320312 118.363281 419.320312 C 139.953125 419.320312 160.09375 424.652344 176.867188 433.871094 L 254.5 86.753906 C 254.875 85.078125 256 83.664062 257.550781 82.925781 Z M 263.804688 96.398438 L 186.097656 443.867188 C 185.699219 445.65625 184.449219 447.136719 182.75 447.828125 C 181.054688 448.519531 179.128906 448.339844 177.589844 447.339844 C 161.476562 436.863281 140.890625 430.515625 118.363281 430.515625 C 65.265625 430.515625 24.316406 465.238281 24.316406 505.742188 C 24.316406 546.246094 65.265625 580.96875 118.363281 580.96875 C 169.347656 580.96875 209.253906 548.871094 212.226562 510.449219 C 212.246094 510.238281 212.273438 510.027344 212.3125 509.820312 C 212.640625 508.117188 212.972656 506.398438 213.304688 504.65625 L 213.507812 503.617188 C 224.703125 445.472656 239.796875 367.089844 254.207031 314.144531 C 257.816406 300.882812 261.40625 289.113281 264.917969 279.609375 C 268.363281 270.273438 271.921875 262.5625 275.636719 257.847656 C 277.441406 255.554688 279.902344 253.15625 283.132812 252.296875 C 287 251.269531 290.398438 252.792969 292.792969 255.269531 C 294.953125 257.5 296.554688 260.699219 297.851562 264.304688 C 299.191406 268.015625 300.382812 272.683594 301.460938 278.3125 C 305.703125 300.488281 313.855469 315.796875 323.933594 326.179688 C 334.003906 336.550781 346.332031 342.351562 359.515625 344.972656 C 378.5625 348.753906 399.203125 345.84375 416.480469 340.570312 C 402.964844 336.917969 388.066406 330.261719 375.1875 319.394531 C 354.84375 302.234375 339.964844 274.898438 343.183594 233.792969 C 346.125 196.15625 332.613281 164.921875 314.289062 141.007812 C 298.285156 120.121094 278.75 105.003906 263.804688 96.398438 Z M 263.804688 96.398438 "/></g></g>
-                    </g>
-                  </mask>
-
-                  <!-- Suave glow del contorno -->
-                  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="1.25" result="coloredBlur"/>
-                    <feMerge>
-                      <feMergeNode in="coloredBlur"/>
-                      <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                  </filter>
-                </defs>
-
-                <!-- Relleno vertical enmascarado por la máscara de la corchea -->
-                <rect id="fillRect" x="0" y="300" width="300" height="0" fill="url(#gradSAP)" mask="url(#noteMask)"></rect>
-
-                <!-- Contorno/figura de la corchea para que se vea nítida por encima -->
-                <g id="noteOutline" transform="translate(50.0000,0.0000) scale(0.444444)" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" filter="url(#glow)">
-                  <defs><clipPath id="1c323f6acc"><path d="M 9.667969 82.167969 L 440 82.167969 L 440 592.164062 L 9.667969 592.164062 Z M 9.667969 82.167969 "/></clipPath><clipPath id="d23d4fdc49"><path d="M 13.011719 82.167969 L 443.621094 82.167969 L 443.621094 592.164062 L 13.011719 592.164062 Z M 13.011719 82.167969 "/></clipPath></defs><g id="f31d12c0b1"><g clip-rule="nonzero" clip-path="url(#1c323f6acc)"><path style=" stroke:none;fill-rule:evenodd;fill:#000000;fill-opacity:1;" d="M 254.207031 82.925781 C 255.757812 82.183594 257.5625 82.199219 259.101562 82.964844 C 275.875 91.296875 300.304688 108.71875 319.824219 134.195312 C 339.398438 159.746094 354.203125 193.648438 350.992188 234.667969 C 348.054688 272.214844 361.496094 296.023438 379.054688 310.835938 C 396.886719 325.878906 419.390625 331.972656 434.5625 332.910156 C 437.113281 333.066406 439.234375 334.9375 439.714844 337.449219 C 440.191406 339.964844 438.90625 342.480469 436.589844 343.566406 C 416.050781 353.183594 383.800781 361.875 353.996094 355.953125 C 338.964844 352.96875 324.46875 346.242188 312.566406 333.980469 C 300.671875 321.726562 291.695312 304.285156 287.128906 280.417969 C 286.113281 275.113281 285.050781 271.0625 283.984375 268.101562 C 283.199219 265.917969 282.492188 264.558594 281.960938 263.761719 C 281.722656 264.007812 281.425781 264.335938 281.078125 264.777344 C 278.542969 267.996094 275.476562 274.253906 272.066406 283.492188 C 268.71875 292.5625 265.222656 303.980469 261.65625 317.085938 C 247.371094 369.578125 232.347656 447.574219 221.121094 505.886719 C 220.746094 507.824219 220.378906 509.742188 220.011719 511.636719 C 216.257812 557.539062 169.710938 592.164062 115.019531 592.164062 C 58.054688 592.164062 9.785156 554.511719 9.785156 505.742188 C 9.785156 456.972656 58.054688 419.320312 115.019531 419.320312 C 136.609375 419.320312 156.75 424.652344 173.523438 433.871094 L 251.15625 86.753906 C 251.53125 85.078125 252.65625 83.664062 254.207031 82.925781 Z M 260.464844 96.398438 L 182.753906 443.867188 C 182.355469 445.65625 181.105469 447.136719 179.40625 447.828125 C 177.710938 448.519531 175.785156 448.339844 174.246094 447.339844 C 158.132812 436.863281 137.546875 430.515625 115.019531 430.515625 C 61.921875 430.515625 20.972656 465.238281 20.972656 505.742188 C 20.972656 546.246094 61.921875 580.96875 115.019531 580.96875 C 166.003906 580.96875 205.914062 548.871094 208.886719 510.449219 C 208.902344 510.238281 208.929688 510.027344 208.96875 509.820312 C 209.296875 508.117188 209.628906 506.398438 209.964844 504.65625 L 210.164062 503.617188 C 221.359375 445.472656 236.453125 367.089844 250.863281 314.144531 C 254.472656 300.882812 258.066406 289.113281 261.574219 279.609375 C 265.019531 270.273438 268.578125 262.5625 272.292969 257.847656 C 274.097656 255.554688 276.558594 253.15625 279.789062 252.296875 C 283.65625 251.269531 287.054688 252.792969 289.449219 255.269531 C 291.609375 257.5 293.210938 260.699219 294.511719 264.304688 C 295.847656 268.015625 297.042969 272.683594 298.117188 278.3125 C 302.363281 300.488281 310.511719 315.796875 320.589844 326.179688 C 330.660156 336.550781 342.988281 342.351562 356.171875 344.972656 C 375.21875 348.753906 395.859375 345.84375 413.136719 340.570312 C 399.621094 336.917969 384.722656 330.261719 371.84375 319.394531 C 351.5 302.234375 336.625 274.898438 339.839844 233.792969 C 342.785156 196.15625 329.269531 164.921875 310.945312 141.007812 C 294.941406 120.121094 275.40625 105.003906 260.464844 96.398438 Z M 260.464844 96.398438 "/></g><g clip-rule="nonzero" clip-path="url(#d23d4fdc49)"><path style=" stroke:none;fill-rule:evenodd;fill:#000000;fill-opacity:1;" d="M 257.550781 82.925781 C 259.101562 82.183594 260.90625 82.199219 262.445312 82.964844 C 279.21875 91.296875 303.648438 108.71875 323.167969 134.195312 C 342.742188 159.746094 357.546875 193.648438 354.335938 234.667969 C 351.398438 272.214844 364.839844 296.023438 382.398438 310.835938 C 400.230469 325.878906 422.734375 331.972656 437.90625 332.910156 C 440.457031 333.066406 442.578125 334.9375 443.058594 337.449219 C 443.535156 339.964844 442.25 342.480469 439.933594 343.566406 C 419.394531 353.183594 387.140625 361.875 357.335938 355.953125 C 342.308594 352.96875 327.8125 346.242188 315.90625 333.980469 C 304.011719 321.726562 295.039062 304.285156 290.472656 280.417969 C 289.457031 275.113281 288.394531 271.0625 287.328125 268.101562 C 286.542969 265.917969 285.835938 264.558594 285.304688 263.761719 C 285.0625 264.007812 284.769531 264.335938 284.421875 264.777344 C 281.886719 267.996094 278.820312 274.253906 275.410156 283.492188 C 272.0625 292.5625 268.566406 303.980469 265 317.085938 C 250.714844 369.578125 235.691406 447.574219 224.464844 505.886719 C 224.089844 507.824219 223.722656 509.742188 223.355469 511.636719 C 219.601562 557.539062 173.050781 592.164062 118.363281 592.164062 C 61.398438 592.164062 13.128906 554.511719 13.128906 505.742188 C 13.128906 456.972656 61.398438 419.320312 118.363281 419.320312 C 139.953125 419.320312 160.09375 424.652344 176.867188 433.871094 L 254.5 86.753906 C 254.875 85.078125 256 83.664062 257.550781 82.925781 Z M 263.804688 96.398438 L 186.097656 443.867188 C 185.699219 445.65625 184.449219 447.136719 182.75 447.828125 C 181.054688 448.519531 179.128906 448.339844 177.589844 447.339844 C 161.476562 436.863281 140.890625 430.515625 118.363281 430.515625 C 65.265625 430.515625 24.316406 465.238281 24.316406 505.742188 C 24.316406 546.246094 65.265625 580.96875 118.363281 580.96875 C 169.347656 580.96875 209.253906 548.871094 212.226562 510.449219 C 212.246094 510.238281 212.273438 510.027344 212.3125 509.820312 C 212.640625 508.117188 212.972656 506.398438 213.304688 504.65625 L 213.507812 503.617188 C 224.703125 445.472656 239.796875 367.089844 254.207031 314.144531 C 257.816406 300.882812 261.40625 289.113281 264.917969 279.609375 C 268.363281 270.273438 271.921875 262.5625 275.636719 257.847656 C 277.441406 255.554688 279.902344 253.15625 283.132812 252.296875 C 287 251.269531 290.398438 252.792969 292.792969 255.269531 C 294.953125 257.5 296.554688 260.699219 297.851562 264.304688 C 299.191406 268.015625 300.382812 272.683594 301.460938 278.3125 C 305.703125 300.488281 313.855469 315.796875 323.933594 326.179688 C 334.003906 336.550781 346.332031 342.351562 359.515625 344.972656 C 378.5625 348.753906 399.203125 345.84375 416.480469 340.570312 C 402.964844 336.917969 388.066406 330.261719 375.1875 319.394531 C 354.84375 302.234375 339.964844 274.898438 343.183594 233.792969 C 346.125 196.15625 332.613281 164.921875 314.289062 141.007812 C 298.285156 120.121094 278.75 105.003906 263.804688 96.398438 Z M 263.804688 96.398438 "/></g></g>
-                </g>
-              </svg>
-              <div class="label">
-                <span id="pct">0%</span>
-                <small id="status">Sensores inactivos</small>
-              </div>
-            </div>
-          </div>
-          <div>
-            <h2 style="margin:0 0 6px;">¡Agita para llenar la corchea!</h2>
-            <p class="hint">
-              Usa <b>Sensores</b> para solicitar permiso (iOS) o <b>Sumar</b> si no hay acelerómetro. Cambia de tema con el switch <b>SAP/Kids</b>.
-            </p>
-            <div class="debug" id="debug">debug: —</div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer class="footer">
-      El SVG que adjuntaste ya está integrado y escalado automáticamente al lienzo 300×300.
-    </footer>
-  </div>
-
-  <!-- Mensaje de victoria -->
-  <div class="win" id="win">
-    <div class="msg">
-      <h2>¡Energía lista! ⚡</h2>
-      <p>“Juega con ritmo, juega en equipo.”</p>
+  <div id="overlay-start" class="overlay">
+    <div class="overlay-content">
+      <h2>¡Rock Challenge! ⚡</h2>
+      <p>El desafío es simple: ¡llena de energía la nota musical agitando tu celular <strong>lo más rápido que puedas</strong>! Tu tiempo corre desde el primer momento. ¡Demuestra tu velocidad para entrar al sorteo!</p>
+      <button id="startButton">¡Comenzar!</button>
     </div>
   </div>
 
-<script>
-(() => {
-  const btnPermission = document.getElementById('btn-permission');
-  const btnTap = document.getElementById('btn-tap');
-  const btnRestart = document.getElementById('btn-restart');
-  const btnSAP = document.getElementById('btn-sap');
-  const btnKids = document.getElementById('btn-kids');
-  const pctEl = document.getElementById('pct');
-  const statusEl = document.getElementById('status');
-  const debugEl = document.getElementById('debug');
-  const fillRect = document.getElementById('fillRect');
-  const noteOutline = document.getElementById('noteOutline');
-  const win = document.getElementById('win');
+  <div id="overlay-results" class="overlay hidden">
+    <div class="results-wrapper">
+      <p class="final-message" id="final-message"></p>
+      <h2 class="final-time-value" id="final-time"></h2>
+    </div>
+  </div>
 
-  let progress = 0;
-  let enabled = false;
-  let finished = false;
-  let lastAccel = {x: null, y: null, z: null};
-  let lastTime = 0;
-  let bbox = null;
+  <canvas id="confetti-canvas"></canvas>
 
-  // Theme handling
-  const confettiColors = {
-    sap: ['#0057D2','#0070F2','#4DB1FF','#89D1FF','#FFFFFF'],
-    kids: ['#6a00ff','#00a0ff','#00ffe5','#57ff36','#ffee00','#ff7a00','#ff00d4']
-  };
-  let currentTheme = localStorage.getItem('theme_note_app') || 'sap';
+  <div class="game-area">
+    <div class="music-note-container">
+      <svg id="userQuaver" viewBox="0 0 450 675" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="fillGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop id="fillStop1" offset="0%" stop-color="var(--sap-blue)" />
+            <stop id="fillStop2" offset="0%" stop-color="rgba(30, 30, 30, 0.2)" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M 254.2 82.9 C 255.8 82.2 257.6 82.2 259.1 83 C 275.9 91.3 300.3 108.7 319.8 134.2 C 339.4 159.7 354.2 193.6 351 234.7 C 348.1 272.2 361.5 296 379.1 310.8 C 396.9 325.9 419.4 332 434.6 332.9 C 437.1 333.1 439.2 334.9 439.7 337.4 C 440.2 340 438.9 342.5 436.6 343.6 C 416.1 353.2 383.8 361.9 354 356 C 339 353 324.5 346.2 312.6 334 C 300.7 321.7 291.7 304.3 287.1 280.4 C 286.1 275.1 285.1 271.1 284 268.1 C 283.2 265.9 282.5 264.6 282 263.8 C 281.7 264 281.4 264.3 281.1 264.8 C 278.5 268 275.5 274.3 272.1 283.5 C 268.7 292.6 265.2 304 261.7 317.1 C 247.4 369.6 232.3 447.6 221.1 505.9 C 220.7 507.8 220.4 509.7 220 511.6 C 216.3 557.5 169.7 592.2 115 592.2 C 58.1 592.2 9.8 554.5 9.8 505.7 C 9.8 457 58.1 419.3 115 419.3 C 136.6 419.3 156.8 424.7 173.5 433.9 L 251.2 86.8 C 251.5 85.1 252.7 83.7 254.2 82.9 Z"
+          fill="url(#fillGradient)" stroke="var(--glow-color)" stroke-width="8" />
+      </svg>
+    </div>
+  </div>
 
-  function applyTheme(t){
-    currentTheme = t;
-    document.body.classList.toggle('theme-sap', t==='sap');
-    document.body.classList.toggle('theme-kids', t==='kids');
-    // Cambiar relleno del rect
-    fillRect.setAttribute('fill', t==='sap' ? 'url(#gradSAP)' : 'url(#gradKids)');
-    // Botones activos
-    btnSAP.classList.toggle('active', t==='sap');
-    btnKids.classList.toggle('active', t==='kids');
-    btnSAP.setAttribute('aria-selected', t==='sap');
-    btnKids.setAttribute('aria-selected', t==='kids');
-    localStorage.setItem('theme_note_app', t);
-  }
+  <footer class="footer">Rock Challenge</footer>
 
-  function computeBBox(){
-    try{
-      bbox = noteOutline.getBBox();
-      fillRect.setAttribute('x', bbox.x);
-      fillRect.setAttribute('width', bbox.width);
-      updateFill(0);
-    }catch(err){
-      debugEl.textContent = 'debug: getBBox() reintentando…';
-      requestAnimationFrame(computeBBox);
-    }
-  }
+  <audio id="sound-guitar" loop src="data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tQxAADBgwgAAAAAB9FbEd4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAElZpY3RvcmlhIEhlcm5hbmRlenp6egAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//uQxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlMYXZmNTguNDUuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//uQxAsCAAAANIAYAAANIAYAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV-A//uQxAYEAAAAANIAYAAANIAYAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV"></audio>
 
-  function updateFill(p){
-    progress = Math.max(0, Math.min(100, p));
-    pctEl.textContent = Math.round(progress) + '%';
-    if(!bbox) return;
-    const h = bbox.height * (progress/100);
-    const y = bbox.y + bbox.height - h;
-    fillRect.setAttribute('y', y);
-    fillRect.setAttribute('height', h);
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    if(progress >= 100 && !finished){
-      finished = true;
-      statusEl.textContent = '¡Completado!';
-      showWin();
-      startConfetti(2800);
-      btnRestart.hidden = false;
-      window.removeEventListener('devicemotion', onMotion, true);
-    }
-  }
+  <script>
+    const DOMElements = {
+        overlayStart: document.getElementById('overlay-start'),
+        overlayResults: document.getElementById('overlay-results'),
+        startButton: document.getElementById('startButton'),
+        fillStop1: document.getElementById('fillStop1'),
+        fillStop2: document.getElementById('fillStop2'),
+        finalTimeDisplay: document.getElementById('final-time'),
+        finalMessageDisplay: document.getElementById('final-message'),
+        canvas: document.getElementById('confetti-canvas'),
+    };
 
-  function addProgress(delta){
-    if (finished) return;
-    updateFill(progress + delta);
-  }
+    const Sounds = {
+        guitar: document.getElementById('sound-guitar'),
+    };
 
-  function onMotion(e){
-    const a = e.acceleration && (e.acceleration.x !== null) ? e.acceleration : e.accelerationIncludingGravity;
-    if(!a) return;
-    const now = Date.now();
-    if(now - lastTime < 50) return;
-    lastTime = now;
+    const GameState = {
+        beats: 0,
+        targetBeats: 600,
+        isGameActive: false,
+        startTime: 0,
+        confettiLauncher: confetti.create(DOMElements.canvas, { resize: true, useWorker: true }),
+    };
 
-    if(lastAccel.x === null){
-      lastAccel = {x:a.x||0, y:a.y||0, z:a.z||0};
-      return;
-    }
-    const dx = (a.x||0) - lastAccel.x;
-    const dy = (a.y||0) - lastAccel.y;
-    const dz = (a.z||0) - lastAccel.z;
-    lastAccel = {x:a.x||0, y:a.y||0, z:a.z||0};
-
-    const intensity = Math.sqrt(dx*dx + dy*dy + dz*dz);
-    const factor = 1.6;
-    const delta = Math.min(5, intensity * factor);
-
-    if(delta > 0.15){
-      addProgress(delta);
-      statusEl.textContent = 'Detectando movimiento…';
-    }
-    debugEl.textContent = `debug: a=(${(a.x||0).toFixed(2)} , ${(a.y||0).toFixed(2)} , ${(a.z||0).toFixed(2)}) | Δ=${intensity.toFixed(2)} | +${delta.toFixed(2)}`;
-  }
-
-  async function requestPermission(){
-    try{
-      if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
-        const state = await DeviceMotionEvent.requestPermission();
-        if(state === 'granted'){
-          enableMotion();
-        }else{
-          statusEl.textContent = 'Permiso denegado. Usa “Sumar”.';
+    function vibrate(pattern) {
+        if (navigator.vibrate) {
+            navigator.vibrate(pattern);
         }
-      }else{
-        enableMotion();
-      }
-    }catch(err){
-      statusEl.textContent = 'Error permiso. Usa “Sumar”.';
-      debugEl.textContent = 'debug: ' + (err && err.message ? err.message : String(err));
     }
-  }
 
-  function enableMotion(){
-    if(enabled) return;
-    enabled = true;
-    statusEl.textContent = 'Sensores activos';
-    window.addEventListener('devicemotion', onMotion, true);
-  }
+    function handleMotion(event) {
+        if (!GameState.isGameActive) return;
 
-  function resetAll(){
-    finished = false;
-    btnRestart.hidden = true;
-    hideWin();
-    updateFill(0);
-    statusEl.textContent = enabled ? 'Sensores activos' : 'Sensores inactivos';
-    if(enabled){
-      window.removeEventListener('devicemotion', onMotion, true);
-      window.addEventListener('devicemotion', onMotion, true);
-    }
-  }
+        const acc = event.accelerationIncludingGravity;
+        const shakePower = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
 
-  btnPermission.addEventListener('click', requestPermission);
-  btnTap.addEventListener('click', () => addProgress(5));
-  btnRestart.addEventListener('click', resetAll);
-  btnSAP.addEventListener('click', () => applyTheme('sap'));
-  btnKids.addEventListener('click', () => applyTheme('kids'));
+        if (shakePower > 30) {
+            GameState.beats++;
 
-  // Doble toque para sumar en móviles
-  let lastTap = 0;
-  window.addEventListener('touchend', () => {
-    const now = Date.now();
-    if(now - lastTap < 300) addProgress(4);
-    lastTap = now;
-  }, {passive:true});
+            const fillPercentage = Math.min((GameState.beats / GameState.targetBeats) * 100, 100);
+            DOMElements.fillStop1.setAttribute('offset', `${fillPercentage}%`);
+            DOMElements.fillStop2.setAttribute('offset', `${fillPercentage}%`);
 
-  // Confetti
-  const canvas = document.getElementById('confettiCanvas');
-  const ctx = canvas.getContext('2d');
-  let confettiPieces = [];
-  let animId = null;
+            if (Sounds.guitar.paused) {
+                Sounds.guitar.play().catch(e => {});
+            }
+            vibrate(50);
 
-  function resizeCanvas(){
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
-
-  function randomRange(min, max){ return Math.random() * (max - min) + min; }
-
-  function createConfetti(count){
-    const colors = currentTheme==='sap' ? confettiColors.sap : confettiColors.kids;
-    const pieces = [];
-    for(let i=0;i<count;i++){
-      pieces.push({
-        x: Math.random()*canvas.width,
-        y: randomRange(-20, -canvas.height*0.3),
-        size: randomRange(6, 12),
-        color: colors[i % colors.length],
-        angle: randomRange(0, Math.PI*2),
-        speedX: randomRange(-1, 1),
-        speedY: randomRange(2, 5),
-        rot: randomRange(0, Math.PI*2),
-        rotSpeed: randomRange(-0.2, 0.2),
-      });
-    }
-    return pieces;
-  }
-
-  function drawConfetti(){
-    ctx.clearRect(0,0,canvas.width, canvas.height);
-    for(const p of confettiPieces){
-      p.x += p.speedX;
-      p.y += p.speedY;
-      p.rot += p.rotSpeed;
-      if(p.y > canvas.height + 20){ p.y = -10; p.x = Math.random()*canvas.width; }
-
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot);
-      ctx.fillStyle = p.color;
-      ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
-      ctx.restore();
-    }
-    animId = requestAnimationFrame(drawConfetti);
-  }
-
-  function startConfetti(ms=2500){
-    confettiPieces = createConfetti(180);
-    if(animId) cancelAnimationFrame(animId);
-    drawConfetti();
-    setTimeout(() => {
-      const fade = setInterval(() => {
-        confettiPieces.forEach(p => p.speedY *= 0.92);
-        if(confettiPieces.every(p => p.speedY < 0.2)){
-          clearInterval(fade);
-          if(animId) cancelAnimationFrame(animId);
-          ctx.clearRect(0,0,canvas.width, canvas.height);
-          confettiPieces = [];
+            if (GameState.beats >= GameState.targetBeats) {
+                endGame();
+            }
         }
-      }, 60);
-    }, ms);
-  }
+    }
 
-  function showWin(){ win.classList.add('show'); }
-  function hideWin(){ win.classList.remove('show'); }
+    function endGame() {
+        GameState.isGameActive = false;
+        window.removeEventListener('devicemotion', handleMotion);
+        Sounds.guitar.pause();
+        
+        const finalTime = ((Date.now() - GameState.startTime) / 1000).toFixed(2);
+        
+        DOMElements.finalMessageDisplay.innerText = `¡Rockeaste en`;
+        DOMElements.finalTimeDisplay.innerText = `${finalTime}s!`;
+        DOMElements.overlayResults.classList.remove('hidden');
 
-  window.addEventListener('load', () => {
-    // Start with theme from storage
-    applyTheme(currentTheme);
-    computeBBox();
-    updateFill(0);
-  });
-})();
-</script>
+        launchConfetti();
+        vibrate([200, 100, 200]);
+
+        setTimeout(() => {
+            window.location.href = 'https://forms.gle/VvtAHk7RNg5DyYM3A';
+        }, 4000);
+    }
+
+    function launchConfetti() {
+        const duration = 3 * 1000;
+        const animationEnd = Date.now() + duration;
+        const colors = ['#0077C6', '#ADD8E6', '#FFFFFF', '#FF00FF'];
+        function frame() {
+            GameState.confettiLauncher({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors: colors });
+            GameState.confettiLauncher({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors: colors });
+            if (Date.now() < animationEnd) requestAnimationFrame(frame);
+        }
+        frame();
+    }
+    
+    async function initializeGame() {
+        DOMElements.overlayStart.classList.add('hidden');
+
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioContext.createBufferSource();
+            source.buffer = audioContext.createBuffer(1, 1, 22050);
+            source.connect(audioContext.destination);
+            if (source.start) {
+              source.start(0);
+            } else if (source.noteOn) {
+              source.noteOn(0);
+            }
+            await Sounds.guitar.play();
+            Sounds.guitar.pause();
+            Sounds.guitar.currentTime = 0;
+        } catch (e) {
+            console.warn("El contexto de audio no pudo ser iniciado por el usuario. El teléfono podría estar en silencio.");
+        }
+
+        if (typeof DeviceMotionEvent.requestPermission === 'function') {
+            try {
+                const permissionState = await DeviceMotionEvent.requestPermission();
+                if (permissionState === 'granted') {
+                    window.addEventListener('devicemotion', handleMotion);
+                    startGame();
+                } else {
+                    alert('Para jugar, necesitas permitir el acceso al sensor de movimiento.');
+                    DOMElements.overlayStart.classList.remove('hidden');
+                }
+            } catch (error) {
+                alert('Hubo un error al solicitar los permisos.');
+                DOMElements.overlayStart.classList.remove('hidden');
+            }
+        } else {
+            window.addEventListener('devicemotion', handleMotion);
+            startGame();
+        }
+    }
+    
+    function startGame() {
+        GameState.isGameActive = true;
+        GameState.startTime = Date.now();
+    }
+
+    DOMElements.startButton.addEventListener('click', initializeGame);
+  </script>
 </body>
 </html>
